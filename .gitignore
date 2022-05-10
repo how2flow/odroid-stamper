@@ -1,4 +1,8 @@
 .gitignore
+
+.config
+.foo*
+*.img*
 *.swp
 
 downloads/
@@ -6,3 +10,5 @@ rootfs/
 out/
 
 *.squashfs
+
+*.log

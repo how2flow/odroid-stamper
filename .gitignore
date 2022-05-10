@@ -1,4 +1,8 @@
 .gitignore
+
+.config
+.foo*
+*.img*
 *.swp
 
 downloads/

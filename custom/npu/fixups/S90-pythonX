@@ -1,0 +1,20 @@
+#!/bin/sh
+
+list="3.5 3.6 3.7 3.8 3.9"
+repo=ppa:deadsnakes/ppa
+
+for ver in ${list}
+	do
+		pythonX="${pythonX} python${ver} python${ver}-dev"
+	done
+
+if [ -z $(which add-apt-repository) ]; then
+apt install @@DEFAULT_APT_OPTIONS@@ \
+		software-properties-common
+fi
+
+add-apt-repository ${repo}
+apt update --allow-releaseinfo-change \
+	&& apt upgrade -y
+apt install @@DEFAULT_APT_OPTIONS@@ \
+	${pythonX}

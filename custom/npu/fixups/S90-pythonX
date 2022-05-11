@@ -13,7 +13,7 @@ apt install @@DEFAULT_APT_OPTIONS@@ \
 		software-properties-common
 fi
 
-add-apt-repository ${repo}
+echo -ne '\n' | add-apt-repository ${repo}
 apt update --allow-releaseinfo-change \
 	&& apt upgrade -y
 apt install @@DEFAULT_APT_OPTIONS@@ \

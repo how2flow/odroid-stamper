@@ -1,6 +1,5 @@
 cmake
 g++
-git
 libopencv-dev
 librga-dev
 make

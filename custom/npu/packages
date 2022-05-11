@@ -1,0 +1,9 @@
+cmake
+g++
+git
+libopencv-dev
+librga-dev
+make
+python3-opencv
+python3-pip
+rkaiq

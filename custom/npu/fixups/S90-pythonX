@@ -1,20 +1,24 @@
 #!/bin/sh
 
-list="3.5 3.6 3.7 3.8 3.9"
-repo=ppa:deadsnakes/ppa
+CV2=/usr/lib/python3/dist-packages/cv2.cpython-38-aarch64-linux-gnu.so
+HOME=/home/odroid
+WHL=${HOME}/rknn-toolkit2/rknn-toolkit-lite2-v1.2.0/packages/rknn_toolkit_lite2-1.2.0-cp39-cp39-linux_aarch64.whl
 
-for ver in ${list}
-	do
-		pythonX="${pythonX} python${ver} python${ver}-dev"
-	done
+virtualenv ${HOME}/.rknn --python=3.9 --system-site-package
 
-if [ -z $(which add-apt-repository) ]; then
-apt install @@DEFAULT_APT_OPTIONS@@ \
-		software-properties-common
-fi
+echo "========== symlink cv2 start =========="
+[ -f ${CV2} ] && ln -s ${CV2} ${HOME}/.rknn/lib/python3.9/site-packages/cv2.so
+echo "========== symlink cv2 finish =========="
 
-add-apt-repository ${repo} -y
-apt update --allow-releaseinfo-change \
-	&& apt upgrade -y
-apt install @@DEFAULT_APT_OPTIONS@@ \
-	${pythonX}
+echo "========== git clone start =========="
+git clone https://github.com/hardkernel/rknpu2 ${HOME}/rknpu2
+git clone https://github.com/hardkernel/rknn-toolkit2 ${HOME}/rknn-toolkit2
+echo "========== git clone finish =========="
+
+echo "========== pip install start =========="
+${HOME}/.rknn/bin/python3 -m pip install opencv-python
+[ -f ${WHL} ] && ${HOME}/.rknn/bin/python3 -m pip install ${WHL}
+${HOME}/.rknn/bin/python3 -m pip uninstall opencv-python
+echo "========== pip install finish =========="
+
+echo "source ${HOME}/.rknn/bin/activate" >> ${HOME}/.bashrc

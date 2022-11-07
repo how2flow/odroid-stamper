@@ -1,0 +1,14 @@
+#!/bin/sh
+
+DEFULAT_DISTRO=@@DEFAULT_DISTRO@@
+
+case ${DEFULAT_DISTRO} in
+  focal)
+    apt install @@DEFAULT_APT_OPTIONS@@ \
+    ros-foxy-ros-base
+    ;;
+  jammy)
+    apt install @@DEFAULT_APT_OPTIONS@@ \
+    ros-humble-ros-base
+    ;;
+esac

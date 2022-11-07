@@ -1,4 +1,4 @@
-BOARD=odroidn2l
+BOARD=odroidm1
 ARCH=arm64
 DISTRO=focal
 FLAVOUR=weston

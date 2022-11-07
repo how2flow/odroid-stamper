@@ -1,0 +1,8 @@
+#!/bin/sh
+
+HOME=/home/odroid
+
+git clone https://github.com/hardkernel/npu_camera ${HOME}/npu_camera
+chown -R odroid:odroid ${HOME}/npu_camera
+
+ln -s ${HOME}/npu_camera ${HOME}/robot_ws/src/npu_camera

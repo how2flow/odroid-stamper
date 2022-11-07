@@ -2,10 +2,6 @@
 
 HOME=/home/odroid
 
-echo "===== git clone npu_camera ros pkg ====="
-git clone https://github.com/hardkernel/npu_camera ${HOME}/robot_ws
-chown -R odroid:odroid ${HOME}/robot_ws
-
 cat<<__EOF >> ${HOME}/.bashrc
 
 # ROS setting

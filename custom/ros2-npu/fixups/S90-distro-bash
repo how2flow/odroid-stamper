@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "=== change ros distro ==="
+
+DEFAULT_DISTRO=@@DEFAULT_DISTRO@@
+HOME=/home/odroid
+
+case ${DEFAULT_DISTRO} in
+  focal)
+    echo "focal = foxy"
+    ;;
+  jammy)
+    echo "jammy = humble"
+    sed -i 's/foxy/humble/g' ${HOME}/.bashrc
+    ;;
+esac

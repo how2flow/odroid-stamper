@@ -1,0 +1,6 @@
+#!/bin/sh
+
+HOME=/home/odroid
+
+mkdir -p ${HOME}/robot_ws/src
+chown -R odroid:odroid ${HOME}/robot_ws

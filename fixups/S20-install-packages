@@ -21,4 +21,14 @@ if ls /overlay/host/debs/*.deb 1>/dev/null 2>&1; then
 	apt install --fix-broken @@DEFAULT_APT_OPTIONS@@
 fi
 
+DKMS=$(dpkg -l | grep dkms | awk '{print $2}')
+if [ "x$DKMS" != "x" ]; then
+	LINUX_HEADER=$(dpkg -l | grep linux-image-[0-9].* | awk '{print $2}' | sed "s/image/headers/g")
+	apt install @@DEFAULT_APT_OPTIONS@@ $LINUX_HEADER
+
+	for dkms in $DKMS; do
+		dpkg-reconfigure $dkms
+	done
+fi
+
 apt remove -y @@DEFAULT_BLACKLIST_PACKAGES@@

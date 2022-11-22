@@ -125,6 +125,10 @@ get_flavour_packages() {
         pkgs="${pkgs} casper"
     fi
 
+    if [ "x${WIFI}" = "xtrue" ]; then
+        pkgs="${pkgs} $(get_packages addon/wifi/packages)"
+    fi
+
     echo ${pkgs} | tr " " "\n" | sort | uniq | tr "\n" " "
 }
 

@@ -49,6 +49,7 @@ for opt in "$@"; do
 		--kernel=*)	opt_kernel_package="${opt#*=}";;
 		--custom=*)
 				opt_custom="${opt#*=}";;
+		--addon-wifi)	opt_wifi=true;;
 	esac
 done
 
@@ -94,6 +95,7 @@ fi
 [ "x${opt_isoimage}" = "xtrue" ] && ISOIMAGE=true
 [ "x${opt_compress}" = "xtrue" ] && COMPRESS=true
 [ "x${opt_internal}" = "xtrue" ] && INTERNAL=true
+[ "x${opt_wifi}" = "xtrue" ] && WIFI=true
 
 [ "${RUN_MENU}" = "true" ] && do_menu
 [ "x${ISOIMAGE}" = "xtrue" ] && LIVESYSTEM=true

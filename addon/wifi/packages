@@ -1,0 +1,6 @@
+linux-firmware
+wireless-tools
+wpasupplicant
+network-manager
+rtl8821au-dkms
+rtl8821cu-dkms

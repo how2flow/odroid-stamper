@@ -2,7 +2,7 @@
 
 HOME=/home/odroid
 
-git clone https://github.com/jkhgit/ros2_hello_steve ${HOME}/hello_steve
+git clone https://github.com/how2flow/ros2_hello_steve ${HOME}/hello_steve
 chown -R odroid:odroid ${HOME}/hello_steve
 
 ln -s ${HOME}/hello_steve ${HOME}/robot_ws/src/hello_steve

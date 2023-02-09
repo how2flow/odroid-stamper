@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cat>>/etc/apt/sources.list.d/ppa-linuxfactory-or-kr.list<<__EOF
+deb [trusted=yes] http://ppa.linuxfactory.or.kr @@DEFAULT_DISTRO@@ retro
+__EOF

@@ -1,0 +1,9 @@
+xinit
+xserver-xorg-core
+xserver-xorg-input-all
+lxde
+lightdm
+lightdm-gtk-greeter
+pulseaudio
+odroid-alsa
+dolphin-emu-master

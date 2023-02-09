@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#
+# Lightdm configuration and let it auto login
+#
+cat>/etc/lightdm/lightdm.conf<<__EOF
+[SeatDefaults]
+autologin-user=@@DEFAULT_USER@@
+autologin-user-timeout=0
+autologin-session=lightdm-autologin
+user-session=ubuntu
+greeter-session=lightdm-gtk-greeter
+__EOF
+
+#
+# Remove screen saver
+#
+sed -i "s/^@xscreensaver/#\@xscreensaver/d" /etc/xdg/lxsession/LXDE/autostart
+
+#
+# Replace OS name to 'RescueZilla' for boot label
+#
+sed -i "s/PRETTY_NAME=.*/PRETTY_NAME=\"Retroid (Retro OS for ODROID)\"/g" /etc/os-release

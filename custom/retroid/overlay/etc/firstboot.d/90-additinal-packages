@@ -1,0 +1,8 @@
+#!/bin/sh
+
+export DEBIAN_FRONTEND=noninteractive
+
+while ! apt-get -qq check 2>/dev/null; do sleep 1; done
+
+PACKAGES=$(ls /var/cache/firstboot/*.deb)
+[ "x$PACKAGES" != "x" ] && /usr/bin/dpkg -i $PACKAGES

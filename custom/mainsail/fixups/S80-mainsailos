@@ -1,0 +1,170 @@
+#!/bin/sh
+
+TOPDIR=/home/@@DEFAULT_USER@@
+DEFAULT_GROUP=@@DEFAULT_USER@@
+
+replace_home_pi() {
+	sed -i "s|/home/pi|/home/@@DEFAULT_USER@@|g" $1
+}
+
+#
+# Klipper
+#
+cd ${TOPDIR}
+git clone https://github.com/KevinOConnor/klipper
+sed -i "s|TMC_BAUD_RATE =.*$|TMC_BAUD_RATE = 9000|g" klipper/klippy/extras/tmc_uart.py
+sed -i "{s|4095|1023|g; s|12|10|g}" klipper/src/linux/analog.c
+
+cd ${TOPDIR}
+virtualenv -p python3 ${TOPDIR}/klippy-env
+${TOPDIR}/klippy-env/bin/pip install -r ${TOPDIR}/klipper/scripts/klippy-requirements.txt
+
+mkdir ${TOPDIR}/printer_data/
+mkdir ${TOPDIR}/printer_data/config
+mkdir ${TOPDIR}/printer_data/logs
+mkdir ${TOPDIR}/printer_data/gcodes
+mkdir ${TOPDIR}/printer_data/systemd
+mkdir ${TOPDIR}/printer_data/comms
+touch ${TOPDIR}/printer_data/config/printer.cfg
+
+cat>${TOPDIR}/klipper/.config<<__EOF
+# CONFIG_LOW_LEVEL_OPTIONS is not set
+# CONFIG_MACH_AVR is not set
+# CONFIG_MACH_ATSAM is not set
+# CONFIG_MACH_ATSAMD is not set
+# CONFIG_MACH_LPC176X is not set
+# CONFIG_MACH_STM32 is not set
+# CONFIG_MACH_HC32F460 is not set
+# CONFIG_MACH_RP2040 is not set
+# CONFIG_MACH_PRU is not set
+# CONFIG_MACH_AR100 is not set
+CONFIG_MACH_LINUX=y
+# CONFIG_MACH_SIMU is not set
+CONFIG_BOARD_DIRECTORY="linux"
+CONFIG_CLOCK_FREQ=50000000
+CONFIG_LINUX_SELECT=y
+CONFIG_USB_VENDOR_ID=0x1d50
+CONFIG_USB_DEVICE_ID=0x614e
+CONFIG_USB_SERIAL_NUMBER="12345"
+CONFIG_WANT_GPIO_BITBANGING=y
+CONFIG_WANT_DISPLAYS=y
+CONFIG_WANT_SENSORS=y
+CONFIG_WANT_LIS2DW=y
+CONFIG_WANT_SOFTWARE_I2C=y
+CONFIG_WANT_SOFTWARE_SPI=y
+CONFIG_CANBUS_FREQUENCY=1000000
+CONFIG_HAVE_GPIO=y
+CONFIG_HAVE_GPIO_ADC=y
+CONFIG_HAVE_GPIO_SPI=y
+CONFIG_HAVE_GPIO_I2C=y
+CONFIG_HAVE_GPIO_HARD_PWM=y
+CONFIG_INLINE_STEPPER_HACK=y
+__EOF
+
+cd ${TOPDIR}/klipper
+make flash
+
+sed -i "s|User=.*|User=@@DEFAULT_USER@@|g" /etc/systemd/system/klipper.service
+replace_home_pi /etc/systemd/system/klipper.service
+cat>${TOPDIR}/printer_data/systemd/klipper.env<<__EOF
+KLIPPER_ARGS="${TOPDIR}/klipper/klippy/klippy.py ${TOPDIR}/printer_data/config/printer.cfg -l ${TOPDIR}/printer_data/logs/klippy.log -I ${TOPDIR}/printer_data/comms/klippy.serial -a ${TOPDIR}/printer_data/comms/klippy.sock"
+__EOF
+cp ${TOPDIR}/klipper/scripts/klipper-mcu.service /etc/systemd/system/
+
+systemctl enable klipper.service
+systemctl enable klipper-mcu.service
+
+#
+# Moonraker
+#
+cd ${TOPDIR}
+git clone https://github.com/Arksine/moonraker.git
+
+cd ${TOPDIR}
+virtualenv -p python3 ${TOPDIR}/moonraker-env
+${TOPDIR}/moonraker-env/bin/pip install -r ${TOPDIR}/moonraker/scripts/moonraker-requirements.txt
+
+cat>${TOPDIR}/printer_data/config/moonraker.conf<<__EOF
+[server]
+host: 0.0.0.0
+port: 7125
+# The maximum size allowed for a file upload (in MiB).  Default 1024 MiB
+max_upload_size: 1024
+# Path to klippy Unix Domain Socket
+klippy_uds_address: ${TOPDIR}/printer_data/comms/klippy.sock
+
+[file_manager]
+# post processing for object cancel. Not recommended for low resource SBCs such as a Pi Zero. Default False
+enable_object_processing: False
+
+[authorization]
+cors_domains:
+    *://my.mainsail.xyz
+    *://*.local
+    *://*.lan
+trusted_clients:
+    10.0.0.0/8
+    127.0.0.0/8
+    169.254.0.0/16
+    172.16.0.0/12
+    192.168.0.0/16
+    FE80::/10
+    ::1/128
+
+# enables partial support of Octoprint API
+[octoprint_compat]
+
+# enables moonraker to track and store print history.
+[history]
+
+# this enables moonraker announcements for mainsail
+[announcements]
+subscriptions:
+    mainsail
+
+# this enables moonraker's update manager
+[update_manager]
+refresh_interval: 168
+enable_auto_refresh: True
+
+[update_manager mainsail]
+type: web
+channel: stable
+repo: mainsail-crew/mainsail
+path: ${TOPDIR}/mainsail
+__EOF
+
+sed -i "s|User=.*|User=@@DEFAULT_USER@@|g" /etc/systemd/system/moonraker.service
+sed -i "s|SupplementaryGroups=.*|SupplementaryGroups=${DEFAULT_GROUP}|g" /etc/systemd/system/moonraker.service
+
+cat>${TOPDIR}/printer_data/systemd/moonraker.env<<__EOF
+MOONRAKER_ARGS="${TOPDIR}/moonraker/moonraker/moonraker.py -d ${TOPDIR}/printer_data"
+__EOF
+
+replace_home_pi /etc/systemd/system/moonraker.service
+systemctl enable moonraker.service
+
+${TOPDIR}/moonraker/scripts/set-policykit-rules.sh
+
+#
+# Nginx
+#
+replace_home_pi /etc/nginx/sites-available/mainsail
+
+mkdir ${TOPDIR}/mainsail
+rm /etc/nginx/sites-enabled/default
+ln -s /etc/nginx/sites-available/mainsail /etc/nginx/sites-enabled/
+systemctl restart nginx
+
+#
+# Mainsail
+#
+cd ${TOPDIR}/mainsail
+wget -q -O mainsail.zip https://github.com/mainsail-crew/mainsail/releases/latest/download/mainsail.zip && unzip mainsail.zip && rm mainsail.zip
+
+#
+# Permission
+#
+chown -R @@DEFAULT_USER@@:${DEFAULT_GROUP} ${TOPDIR}
+adduser @@DEFAULT_USER@@ dialout
+usermod -a -G tty ${DEFAULT_GROUP}

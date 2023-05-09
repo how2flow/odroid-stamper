@@ -1,5 +1,5 @@
 OSNAME=mainsail
-BOARD=odroidc4
+BOARD=odroidm1s
 ARCH=arm64
 DISTRO=focal
 FLAVOUR=server

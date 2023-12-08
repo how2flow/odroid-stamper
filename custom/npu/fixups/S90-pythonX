@@ -1,15 +1,10 @@
 #!/bin/sh
 
-CV2=/usr/lib/python3/dist-packages/cv2.cpython-38-aarch64-linux-gnu.so
 HOME=/home/odroid
-RKNN=/home/odroid/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so
-WHL=${HOME}/rknn-toolkit2/rknn-toolkit-lite2-v1.2.0/packages/rknn_toolkit_lite2-1.2.0-cp39-cp39-linux_aarch64.whl
+RKNN=/home/odroid/rknpu2/runtime/RK356X/Linux/librknn_api/aarch64/librknnrt.so
+WHL=${HOME}/rknn-toolkit2/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.5.2-cp38-cp38-linux_aarch64.whl
 
-virtualenv ${HOME}/.rknn --python=3.9 --system-site-package
-
-echo "========== symlink cv2 start =========="
-[ -f ${CV2} ] && ln -s ${CV2} ${HOME}/.rknn/lib/python3.9/site-packages/cv2.so
-echo "========== symlink cv2 finish =========="
+python3 -m venv ${HOME}/.rknn
 
 echo "========== git clone start =========="
 git clone https://github.com/hardkernel/rknpu2 ${HOME}/rknpu2
@@ -17,9 +12,8 @@ git clone https://github.com/hardkernel/rknn-toolkit2 ${HOME}/rknn-toolkit2
 echo "========== git clone finish =========="
 
 echo "========== pip install start =========="
-yes | ${HOME}/.rknn/bin/python3.9 -m pip install -I opencv-python
-[ -f ${WHL} ] && ${HOME}/.rknn/bin/python3 -m pip install ${WHL}
-yes | ${HOME}/.rknn/bin/python3.9 -m pip uninstall opencv-python
+[ -f ${WHL} ] && yes | ${HOME}/.rknn/bin/python3 -m pip install ${WHL}
+yes | ${HOME}/.rknn/bin/python3 -m pip install opencv-python
 echo "========== pip install finish =========="
 
 echo "========== examples seting start =========="

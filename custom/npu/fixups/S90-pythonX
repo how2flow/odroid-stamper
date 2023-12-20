@@ -1,28 +1,39 @@
 #!/bin/sh
 
 HOME=/home/odroid
-RKNN=/home/odroid/rknpu2/runtime/RK356X/Linux/librknn_api/aarch64/librknnrt.so
-WHL=${HOME}/rknn-toolkit2/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.5.2-cp38-cp38-linux_aarch64.whl
-
-python3 -m venv ${HOME}/.rknn
+RKNN=/home/odroid/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so
+RKNN_OLD=/usr/lib/librknnrt-1-5-2.so
+WHL=${HOME}/rknn-toolkit2/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.6.0-cp38-cp38-linux_aarch64.whl
+WHL_OLD=${HOME}/rknn_toolkit_lite2-1.5.2-cp38-cp38-linux_aarch64.whl
 
 echo "========== git clone start =========="
-git clone https://github.com/hardkernel/rknpu2 ${HOME}/rknpu2
 git clone https://github.com/hardkernel/rknn-toolkit2 ${HOME}/rknn-toolkit2
+git clone https://github.com/hardkernel/rknn_model_zoo ${HOME}/rknn_model_zoo
 echo "========== git clone finish =========="
 
+echo "========== prepare envs =========="
+python3 -m venv ${HOME}/.rknn_lite2
+python3 -m venv ${HOME}/.rknn_lite2_old
+ln -s ${HOME}/rknn-toolkit2/rknpu2 ${HOME}
+echo "============= finish ============="
+
 echo "========== pip install start =========="
-[ -f ${WHL} ] && yes | ${HOME}/.rknn/bin/python3 -m pip install ${WHL}
-yes | ${HOME}/.rknn/bin/python3 -m pip install opencv-python
+[ -f ${WHL} ] && yes | ${HOME}/.rknn_lite2/bin/python3 -m pip install ${WHL}
+yes | ${HOME}/.rknn_lite2/bin/python3 -m pip install opencv-python
+
+[ ! -f ${WHL_OLD} ] && wget -O ${WHL_OLD} https://github.com/hardkernel/rknn-toolkit2/raw/rknn_lite2_old/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.5.2-cp38-cp38-linux_aarch64.whl
+yes | ${HOME}/.rknn_lite2_old/bin/python3 -m pip install ${WHL_OLD} && rm ${WHL_OLD}
+yes | ${HOME}/.rknn_lite2_old/bin/python3 -m pip install opencv-python
 echo "========== pip install finish =========="
 
 echo "========== examples seting start =========="
-chown -R odroid:odroid ${HOME}/rknpu2/
 chown -R odroid:odroid ${HOME}/rknn-toolkit2/
-chown -R odroid:odroid ${HOME}/.rknn/
-[ -f ${RKNN} ] && ln -s ${RKNN} /usr/lib/librknnrt.so
+chown -R odroid:odroid ${HOME}/rknn_model_zoo/
+chown -R odroid:odroid ${HOME}/.rknn_lite2/
+chown -R odroid:odroid ${HOME}/.rknn_lite2_old/
 echo "========== examples seting finish =========="
 
-echo "# activate venv at first"
-echo "source ${HOME}/.rknn/bin/activate" >> ${HOME}/.bashrc
-echo "export LD_LIBRARY_PATH=${HOME}/rknpu2/examples/rknn*/install/*/lib" >> ${HOME}/.bashrc
+echo "========== library seting start =========="
+[ ! -f ${RKNN_OLD} ] && wget -O ${RKNN_OLD} "https://github.com/hardkernel/rknn-toolkit2/raw/rknn_lite2_old/rknn_toolkit_lite2/packages/RK356X/Linux/librknn_api/aarch64/librknnrt.so"
+ln -s ${RKNN_OLD} /usr/lib/librknnrt.so
+echo "========== library seting finish =========="

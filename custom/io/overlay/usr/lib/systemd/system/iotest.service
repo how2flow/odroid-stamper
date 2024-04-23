@@ -1,0 +1,8 @@
+[Unit]
+Description="Python io test"
+
+[Service]
+ExecStart=/home/odroid/.io/bin/python3 /home/odroid/boardio/test.py
+
+[Install]
+WantedBy=multi-user.target

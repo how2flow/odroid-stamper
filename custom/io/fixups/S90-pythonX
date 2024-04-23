@@ -1,0 +1,16 @@
+#!/bin/sh
+
+HOME=/home/odroid
+
+git clone -b test https://github.com/how2flow/boardio
+cd ${HOME}/boardio
+./setup.sh
+cd ${HOME}
+python3 -m venv ${HOME}/.io
+yes | ${HOME}/.io/bin/python3 -m pip install -r wheel ${HOME}/boardio/requirements.txt
+
+echo "========== examples seting start =========="
+chown -R odroid:odroid ${HOME}/boradio/
+echo "========== examples seting finish =========="
+
+systemctl enable iotest
